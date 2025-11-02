@@ -5,10 +5,11 @@
   },
   "remoteUser": "dev",
   "workspaceFolder": "/workspace",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
   "customizations": {
     "vscode": {
       "extensions": ["James-Yu.latex-workshop"]
     }
   },
-  "postCreateCommand": "chmod -R 755 /workspace"
+  "postCreateCommand": "dnf install -y texlive-scheme-full latexmk biber python3 python3-pip ghostscript git && dnf clean all"
 }

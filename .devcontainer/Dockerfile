@@ -14,4 +14,3 @@ RUN dnf install -y \
 # Set a non-root user for VS Code compatibility
 RUN useradd -ms /bin/bash dev
 USER dev
-WORKDIR /workspace
