@@ -1,0 +1,14 @@
+{
+  "name": "LaTeX Dev",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "remoteUser": "dev",
+  "workspaceFolder": "/workspace",
+  "customizations": {
+    "vscode": {
+      "extensions": ["James-Yu.latex-workshop"]
+    }
+  },
+  "postCreateCommand": "chmod -R 755 /workspace"
+}
