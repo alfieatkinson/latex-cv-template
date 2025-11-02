@@ -6,11 +6,11 @@ A clean, modular, and reusable LaTeX CV template, designed for professional CVs 
 
 ## Features
 
-- Pre-built sections for **Education**, **Experience**, **Projects**, **Skills**, and **Certifications**  
-- Modular `.tex` structure for easy customization  
-- Ready-to-build with `latexmk` and PDF output  
-- Optional **DevContainer** support for consistent builds across machines  
-- Minimal dependencies; works with standard TeX Live distributions  
+- Pre-built sections for **Education**, **Experience**, **Projects**, **Skills**, and **Certifications**
+- Modular `.tex` structure for easy customization
+- Ready-to-build with `latexmk` and PDF output
+- Optional **DevContainer** support for consistent builds across machines
+- Minimal dependencies; works with standard TeX Live distributions
 
 ---
 
@@ -36,7 +36,7 @@ cd latex-cv-template
 
 ### Using locally without DevContainer
 
-Ensure you have a **full LaTeX distribution installed (TeX Live recommended) and run:
+Ensure you have a **full LaTeX distribution** installed (TeX Live recommended) and run:
 
 ```bash
 latex -pdf main.tex
@@ -68,6 +68,7 @@ This project is released under a Non-Commercial Creative Commons licence (CC BY-
 See [LICENSE](LICENSE) for full details.
 
 ## Why this template exists
+
 Maintaining a professional CV can be time-consuming. This template provides a:
 
 - Reproducible environment for LaTeX builds
