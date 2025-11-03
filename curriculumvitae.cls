@@ -90,36 +90,36 @@
 % Users can set these values in their preamble/personal-details.tex file
 
 % Basic contact information
-\lxdef \@name         {Your Name}
+\lxdef \@name {}
 \newcommand{\name}[1]{\xdef\@name{#1}}
 
-\lxdef \@phone        {+44 1234 567890}
+\lxdef \@phone {}
 \newcommand{\phone}[1]{\xdef\@phone{#1}}
 
-\lxdef \@email        {your.email@example.com}
+\lxdef \@email {}
 \newcommand{\email}[1]{\xdef\@email{#1}}
 
-\lxdef \@website      {yourwebsite.com}
+\lxdef \@website {}
 \newcommand{\website}[1]{\xdef\@website{#1}}
 
 % Social media profiles
-\lxdef \@linkedin     {linkedin.com/in/yourprofile}
+\lxdef \@linkedin {}
 \newcommand{\linkedin}[1]{\xdef\@linkedin{#1}}
 
-\lxdef \@github       {github.com/yourusername}
+\lxdef \@github {}
 \newcommand{\github}[1]{\xdef\@github{#1}}
 
-\lxdef \@leetcode     {leetcode.com/yourusername}
+\lxdef \@leetcode {}
 \newcommand{\leetcode}[1]{\xdef\@leetcode{#1}}
 
 % Location information
-\lxdef \@city         {Your City}
+\lxdef \@city {}
 \newcommand{\city}[1]{\xdef\@city{#1}}
 
-\lxdef \@county       {Your County}
+\lxdef \@county {}
 \newcommand{\county}[1]{\xdef\@county{#1}}
 
-\lxdef \@country      {Your Country}
+\lxdef \@country {}
 \newcommand{\country}[1]{\xdef\@country{#1}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -341,6 +341,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Main header command that creates the CV header with name and contact info
+% Improved pipe handling: automatically removes pipes when fields are missing
+% - Contact details section: Phone | Email | Website (pipes only appear between existing fields)
+% - Social links section: LinkedIn | GitHub | LeetCode (pipes only appear between existing fields)
+% - Location section: City, County, Country (commas only appear between existing fields)
 \newcommand{\makeheader}{
     % Select font for header (change \headerfontx to use different font)
     \headerfontx
@@ -354,11 +358,18 @@
     % Contact details (conditionally include each if defined)
     \begin{center}
         \small{
+        % Build contact line with proper pipe separation
         \ifx\@phone\empty\else \mayredactcontact{\redactphone}{\@phone} \fi
+        % Add pipe before email if phone exists and email exists
         \ifx\@phone\empty\else \ifx\@email\empty\else \enspace | \fi \fi
         \ifx\@email\empty\else \mayredactcontact{\redactemail}{\href{mailto:\@email}{\linkstyle{\@email}}} \fi
+        % Add pipe before website if (phone OR email exists) AND website exists
         \ifx\@website\empty\else 
-            \ifx\@phone\empty \ifx\@email\empty \else | \fi \else | \fi
+            \ifx\@phone\empty 
+                \ifx\@email\empty \else \enspace | \fi 
+            \else 
+                \enspace | 
+            \fi
             \mayredactcontact{\redactwebsite}{\href{https://www.\@website}{\linkstyle{\@website}}}
         \fi
         }
@@ -368,22 +379,29 @@
     % Social links (conditionally include each if defined)
     \begin{center}
         \small{
+        % Build social links line with proper pipe separation
         \ifx\@linkedin\empty\else
             \mayredactcontact{\redactlinkedin}{\href{https://www.\@linkedin}{\linkstyle{\@linkedin}}}
         \fi
+        % Add pipe before github if linkedin exists and github exists
         \ifx\@linkedin\empty\else \ifx\@github\empty\else \enspace | \fi \fi
         \ifx\@github\empty\else
             \mayredactcontact{\redactgithub}{\href{https://www.\@github}{\linkstyle{\@github}}}
         \fi
-        \ifx\@github\empty\else \ifx\@leetcode\empty\else \enspace | \fi \fi
+        % Add pipe before leetcode if (linkedin OR github exists) AND leetcode exists
         \ifx\@leetcode\empty\else
+            \ifx\@linkedin\empty 
+                \ifx\@github\empty \else \enspace | \fi 
+            \else 
+                \enspace | 
+            \fi
             \mayredactcontact{\redactleetcode}{\href{https://www.\@leetcode}{\linkstyle{\@leetcode}}}
         \fi
         }
     \end{center}
     \vspace{-6mm}
 
-    % Location information (only include if at least one field is present)
+        % Location information (only include if at least one field is present)
     \ifx\@city\empty \ifx\@county\empty \ifx\@country\empty
     \else
         \begin{center}
@@ -393,13 +411,25 @@
                     \ifx\@county\empty
                         \@country
                     \else
-                        \@county, \@country
+                        \ifx\@country\empty
+                            \@county
+                        \else
+                            \@county, \@country
+                        \fi
                     \fi
                 \else
                     \ifx\@county\empty
-                        \@city, \@country
+                        \ifx\@country\empty
+                            \@city
+                        \else
+                            \@city, \@country
+                        \fi
                     \else
-                        \@city, \@county, \@country
+                        \ifx\@country\empty
+                            \@city, \@county
+                        \else
+                            \@city, \@county, \@country
+                        \fi
                     \fi
                 \fi
             }
