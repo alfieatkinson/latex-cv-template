@@ -1,4 +1,4 @@
-FROM fedora:latest
+FROM fedora:40
 
 # Install system packages and full TeX Live in separate layers for better caching
 RUN dnf update -y && \
