@@ -41,22 +41,28 @@ jobs:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
-      
-    - name: Build devcontainer with cache
+
+    - name: Pre-warm cache by pulling existing images
       run: |
-        cd .devcontainer
-        # Try to pull existing image for cache
-        docker pull ghcr.io/${{ github.repository_owner }}/cv-latex:latest || true
-        
-        # Build with cache from registry if available
-        docker build \
-          --cache-from ghcr.io/${{ github.repository_owner }}/cv-latex:latest \
-          --tag cv-latex:latest \
-          --tag ghcr.io/${{ github.repository_owner }}/cv-latex:latest \
-          .
-        
-        # Push the built image for future caching
-        docker push ghcr.io/${{ github.repository_owner }}/cv-latex:latest
+        # Pull any existing cache images to speed up the build
+        docker pull ghcr.io/${{ github.repository_owner }}/cv-latex:latest || echo "No existing latest image found"
+        docker pull ghcr.io/${{ github.repository_owner }}/cv-latex:buildcache || echo "No existing build cache found"
+      
+    - name: Build and push devcontainer with cache
+      uses: docker/build-push-action@v5
+      with:
+        context: .devcontainer
+        push: true
+        load: true
+        tags: |
+          cv-latex:latest
+          ghcr.io/${{ github.repository_owner }}/cv-latex:latest
+        cache-from: |
+          type=registry,ref=ghcr.io/${{ github.repository_owner }}/cv-latex:buildcache
+          type=registry,ref=ghcr.io/${{ github.repository_owner }}/cv-latex:latest
+        cache-to: type=registry,ref=ghcr.io/${{ github.repository_owner }}/cv-latex:buildcache,mode=max
+        target: final
+        platforms: linux/amd64
       
     - name: Build CV in devcontainer
       run: |
