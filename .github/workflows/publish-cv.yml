@@ -58,9 +58,14 @@ jobs:
       
     - name: Build CV in devcontainer
       run: |
+        # Ensure output directory exists and has proper permissions
+        mkdir -p output
+        
+        # Run container as current user to avoid permission issues
         docker run --rm \
           -v ${{ github.workspace }}:/workspace \
           -w /workspace \
+          --user $(id -u):$(id -g) \
           cv-latex:latest \
           bash build.sh
 

@@ -66,8 +66,8 @@ build_version() {
 
 # Build normal version (without redaction)
 echo -e "${BLUE}Building normal version...${NC}"
-# Create a temporary directory in /tmp to avoid permission issues
-TEMP_DIR="/tmp/cv_build_$$"
+# Create a temporary directory in the workspace to avoid permission issues
+TEMP_DIR="$(pwd)/.build_temp_normal_$$"
 mkdir -p "$TEMP_DIR"
 
 # Copy necessary files to temp directory
@@ -93,7 +93,7 @@ cp "$TEMP_DIR/${FILENAME}.pdf" "$OUTPUT_DIR/"
 # Build redacted version  
 echo -e "${BLUE}Building redacted version...${NC}"
 # Create redacted version in temp directory
-TEMP_DIR_REDACTED="/tmp/cv_build_redacted_$$"
+TEMP_DIR_REDACTED="$(pwd)/.build_temp_redacted_$$"
 mkdir -p "$TEMP_DIR_REDACTED"
 
 # Copy necessary files to temp directory
@@ -137,7 +137,7 @@ cp "$TEMP_DIR_REDACTED/redacted.pdf" "$OUTPUT_DIR/"
 
 # Clean up all temporary files
 echo -e "${YELLOW}🧹 Cleaning up temporary files...${NC}"
-rm -rf "/tmp/cv_build_$$" "/tmp/cv_build_redacted_$$" 2>/dev/null || true
+rm -rf "$(pwd)/.build_temp_normal_$$" "$(pwd)/.build_temp_redacted_$$" 2>/dev/null || true
 rm -f "${FILENAME}.aux" "${FILENAME}.fdb_latexmk" "${FILENAME}.fls" "${FILENAME}.log" "${FILENAME}.out" 2>/dev/null || true
 
 echo -e "${GREEN}🎉 Build complete! Both versions created in $OUTPUT_DIR directory:${NC}"
