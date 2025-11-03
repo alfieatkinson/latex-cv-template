@@ -35,6 +35,52 @@
 \RequirePackage{fontawesome5}
 \RequirePackage[most]{tcolorbox}
 \RequirePackage[hidelinks]{hyperref}
+\RequirePackage{ifthen}  % For conditional logic in redaction
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% REDACTION SYSTEM
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Load redaction configuration (if it exists)
+\IfFileExists{preamble/redaction-config.tex}{
+    \input{preamble/redaction-config.tex}
+}{
+    % Default values if redaction config doesn't exist
+    \newcommand{\redactphone}{false}
+    \newcommand{\redactemail}{false}
+    \newcommand{\redactwebsite}{false}
+    \newcommand{\redactlinkedin}{false}
+    \newcommand{\redactgithub}{false}
+    \newcommand{\redactleetcode}{false}
+    \newcommand{\redactfulladdress}{false}
+    \newcommand{\redactworklocations}{false}
+    \newcommand{\redacteducationlocations}{false}
+    \newcommand{\redactcompanies}{false}
+    \newcommand{\redactuniversities}{false}
+    \newcommand{\redactcompanyurls}{false}
+    \newcommand{\redactprojecturls}{false}
+    \newcommand{\redactiontext}{[REDACTED]}
+    \newcommand{\redactioncontacttext}{[CONTACT REDACTED]}
+    \newcommand{\redactionlocationtext}{[LOCATION REDACTED]}
+}
+
+% Simple redaction command
+\newcommand{\mayredact}[2]{%
+    \ifthenelse{\equal{#1}{true}}{#2}%
+}
+
+% Convenience commands
+\newcommand{\mayredactcontact}[2]{%
+    \ifthenelse{\equal{#1}{true}}{\redactioncontacttext}{#2}%
+}
+
+\newcommand{\mayredactlocation}[2]{%
+    \ifthenelse{\equal{#1}{true}}{\redactionlocationtext}{#2}%
+}
+
+\newcommand{\mayredacttext}[2]{%
+    \ifthenelse{\equal{#1}{true}}{\redactiontext}{#2}%
+}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % PERSONAL DETAILS COMMANDS
@@ -308,12 +354,12 @@
     % Contact details (conditionally include each if defined)
     \begin{center}
         \small{
-        \ifx\@phone\empty\else \@phone \fi
+        \ifx\@phone\empty\else \mayredactcontact{\redactphone}{\@phone} \fi
         \ifx\@phone\empty\else \ifx\@email\empty\else \enspace | \fi \fi
-        \ifx\@email\empty\else \href{mailto:\@email}{\linkstyle{\@email}} \fi
+        \ifx\@email\empty\else \mayredactcontact{\redactemail}{\href{mailto:\@email}{\linkstyle{\@email}}} \fi
         \ifx\@website\empty\else 
             \ifx\@phone\empty \ifx\@email\empty \else | \fi \else | \fi
-            \href{https://www.\@website}{\linkstyle{\@website}} 
+            \mayredactcontact{\redactwebsite}{\href{https://www.\@website}{\linkstyle{\@website}}}
         \fi
         }
     \end{center}
@@ -323,15 +369,15 @@
     \begin{center}
         \small{
         \ifx\@linkedin\empty\else
-            \href{https://www.\@linkedin}{\linkstyle{\@linkedin}}
+            \mayredactcontact{\redactlinkedin}{\href{https://www.\@linkedin}{\linkstyle{\@linkedin}}}
         \fi
         \ifx\@linkedin\empty\else \ifx\@github\empty\else \enspace | \fi \fi
         \ifx\@github\empty\else
-            \href{https://www.\@github}{\linkstyle{\@github}}
+            \mayredactcontact{\redactgithub}{\href{https://www.\@github}{\linkstyle{\@github}}}
         \fi
         \ifx\@github\empty\else \ifx\@leetcode\empty\else \enspace | \fi \fi
         \ifx\@leetcode\empty\else
-            \href{https://www.\@leetcode}{\linkstyle{\@leetcode}}
+            \mayredactcontact{\redactleetcode}{\href{https://www.\@leetcode}{\linkstyle{\@leetcode}}}
         \fi
         }
     \end{center}
@@ -342,19 +388,21 @@
     \else
         \begin{center}
             \small{
-            \ifx\@city\empty
-                \ifx\@county\empty
-                    \@country
+            \mayredactlocation{\redactfulladdress}{%
+                \ifx\@city\empty
+                    \ifx\@county\empty
+                        \@country
+                    \else
+                        \@county, \@country
+                    \fi
                 \else
-                    \@county, \@country
+                    \ifx\@county\empty
+                        \@city, \@country
+                    \else
+                        \@city, \@county, \@country
+                    \fi
                 \fi
-            \else
-                \ifx\@county\empty
-                    \@city, \@country
-                \else
-                    \@city, \@county, \@country
-                \fi
-            \fi
+            }
             }
         \end{center}
         \vspace{-4mm}
@@ -387,7 +435,15 @@
 % Parameters: {Company Name}{Company Website URL}{Location}{Job Title}{Start Date}{End Date}{Bullet points}
 \newcommand{\job}[7]{
     \resumeSubheading
-        {\href{#2}{#1}}{#3}
+        {\ifthenelse{\equal{\redactcompanyurls}{true}}{%
+            \mayredacttext{\redactcompanies}{#1}%
+        }{%
+            \ifthenelse{\equal{\redactcompanies}{true}}{%
+                \redactiontext%
+            }{%
+                \href{#2}{#1}%
+            }%
+        }}{\mayredactlocation{\redactworklocations}{#3}}
         {#4}{#5 -- #6}
         \vspace{1mm}
         \ifx&#7&
@@ -415,7 +471,7 @@
 % Parameters: {Institution}{Location}{Degree Title}{Start Year}{End Year}{Graduation Year}{Grade}{Activities}{Modules}
 \newcommand{\longdegree}[9]{
     \resumeSubheading
-        {#1}{#2}
+        {\mayredacttext{\redactuniversities}{#1}}{\mayredactlocation{\redacteducationlocations}{#2}}
         {#3}{#4 -- #5 \ifx&#6&\else (Grad. #6) \fi}
         \resumeItemListStart
             \item \textbf{Grade:} #7
@@ -429,7 +485,7 @@
 \newcommand{\shortdegree}[5]{
 \vspace{0.5mm}
     \begin{tabular*}{0.98\textwidth}[t]{l@{\extracolsep{\fill}}r}
-        \textbf{#1} -- \textbf{#2}: #3 & \textit{\footnotesize{#4}} \\
+        \textbf{\mayredacttext{\redactuniversities}{#1}} -- \textbf{#2}: #3 & \textit{\footnotesize{#4}} \\
         \ifx&#5&\vspace{-0.45cm}\else \textit{\footnotesize{Key Modules: #5}}\fi
     \end{tabular*}
 }
@@ -450,7 +506,7 @@
 % Parameters: {Project Name}{Description}{Start Date}{End Date}{GitHub URL}{Live Demo URL}{Bullet points}
 \newcommand{\project}[7]{
     \resumeProject
-        {{#1\ifx&#5&\else{ [\href{#5}{\linkstyle{GitHub}}]}\fi\ifx&#6&\else{ [\href{#6}{\linkstyle{Live Demo}}]}\fi}}
+        {{#1\ifx&#5&\else{ [\ifthenelse{\equal{\redactprojecturls}{true}}{\redactiontext}{\href{#5}{\linkstyle{GitHub}}}]}\fi\ifx&#6&\else{ [\ifthenelse{\equal{\redactprojecturls}{true}}{\redactiontext}{\href{#6}{\linkstyle{Live Demo}}}]}\fi}}
         {\ifx&#2&\vspace{-0.35cm}\else#2\fi}
         {#3 -- #4}{}
         \vspace{0.5mm}

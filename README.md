@@ -6,11 +6,34 @@ A professional, modular LaTeX CV template designed for easy customisation and co
 
 - **Professional Design**: Clean, modern layout that's ATS-friendly
 - **Modular Structure**: Separate files for each CV section for easy organisation
+- **🔒 Dynamic Redaction System**: Create multiple versions with different levels of privacy
 - **Comprehensive Commands**: Pre-built commands for all common CV elements
 - **Customisable Styling**: Easy-to-modify colours, fonts, and spacing
 - **Social Media Integration**: Built-in support for LinkedIn, GitHub, personal websites
 - **DevContainer Support**: Consistent LaTeX environment across different machines
 - **Flexible Layout**: Support for various section types and formatting options
+
+## 🔒 Redaction System (NEW!)
+
+Create both normal and redacted versions of your CV with one command:
+
+```bash
+# Builds both cv-full.pdf and cv-redacted.pdf
+./build-redacted-cv.sh
+```
+
+**Redacted version automatically hides:**
+- Phone number and email address
+- Full address/location information
+- Work and education locations  
+- Company and project URLs
+
+**Perfect for:**
+- 📝 Job applications (share redacted version initially)
+- 🌐 Portfolio websites (public-safe versions)
+- 🤝 Networking events (privacy-focused versions)
+
+**Customize redaction:** Edit `preamble/redaction-config.tex` to control what gets redacted.
 
 ## Quick Start
 
