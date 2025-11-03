@@ -613,7 +613,7 @@
 % Parameters: {Organisation}{Website URL}{Location}{Position Title}{Start Date}{End Date}{Bullet points}
 \newcommand{\longposition}[7]{
     \resumeSubheading
-        {{#1 [\socialiconlink{globe}{#2}{Organisation Website}]}}{#3}
+        {\href{#2}{#1}}{#3}
         {#4}{#5 -- #6}
         \ifx&#7&
         \else
@@ -628,7 +628,7 @@
 \newcommand{\shortposition}[5]{
 \vspace{0.5mm}\item
     \begin{tabular*}{0.98\textwidth}[t]{l@{\extracolsep{\fill}}r}
-        \textbf{#1 [\socialiconlink{globe}{#2}{Organisation Website}]} -- #3 & \textit{\footnotesize{#4 -- #5}}
+        \textbf{\href{#2}{#1}} -- #3 & \textit{\footnotesize{#4 -- #5}}
     \end{tabular*}
     \vspace{-2.4mm}
 }
@@ -640,18 +640,15 @@
 % Additional information section wrapper (deprecated - use \section{\keywordstyle{Additional Information}} directly)
 \newcommand{\makeadditionalinfo}[1]{
     \section{\keywordstyle{Additional Information}}
-    \vspace{-0.4mm}
-    \resumeHeadingSkillStart
-
+    \vspace{0.4mm}
     #1
-
-    \resumeHeadingSkillEnd
+    \vspace{-2mm}
 }
 
 % Information group entry (for miscellaneous information)
 % Parameters: {Category}{Information}
 \newcommand{\infogroup}[2]{
-    \resumeSubItem{#1: }{#2}
+    \resumeItem{#1: }{#2}
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -663,6 +660,7 @@
     \section{\keywordstyle{References}}
     \vspace{-0.2mm}
     \small{
+        \raggedcolumns
         \begin{multicols}{2}
         \begin{enumerate}[leftmargin=*,labelsep=2mm]
         #1
@@ -675,11 +673,11 @@
 % Reference entry command
 % Parameters: {Name}{Job Title}{Company/Organisation}{Email}{Relationship}
 \newcommand{\reference}[5]{
-    \item \textbf{#1}\\
-        #2\\
-        #3\\
-        Email: #4\\
-        \textit{Relationship: #5}
+    \item \nopagebreak\textbf{#1}\nopagebreak\\
+        \nopagebreak#2\nopagebreak\\
+        \nopagebreak#3\nopagebreak\\
+        \nopagebreak Email: #4\nopagebreak\\
+        \nopagebreak\textit{Relationship: #5}\nopagebreak
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
