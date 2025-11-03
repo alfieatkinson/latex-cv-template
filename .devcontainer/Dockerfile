@@ -1,6 +1,7 @@
-FROM fedora:40
+# Multi-stage build for better caching
+FROM fedora:40 AS base
 
-# Install system packages and full TeX Live in separate layers for better caching
+# Install system packages first
 RUN dnf update -y && \
     dnf install -y \
     python3 \
@@ -10,14 +11,18 @@ RUN dnf update -y && \
     bash \
     && dnf clean all
 
-# Install TeX Live in a separate layer for better caching
+# Install TeX Live and related packages
+FROM base AS texlive
 RUN dnf install -y \
     texlive-scheme-full \
     latexmk \
     biber \
     && dnf clean all
 
-# Set a non-root user for VS Code compatibility
+# Final stage
+FROM texlive AS final
+
+# User setup
 RUN useradd -ms /bin/bash dev
 
 # Create workspace directory with proper permissions
