@@ -53,9 +53,7 @@ jobs:
       with:
         context: .devcontainer
         push: true
-        load: true
         tags: |
-          cv-latex:latest
           ghcr.io/${{ github.repository_owner }}/cv-latex:latest
         cache-from: |
           type=registry,ref=ghcr.io/${{ github.repository_owner }}/cv-latex:buildcache
@@ -63,6 +61,11 @@ jobs:
         cache-to: type=registry,ref=ghcr.io/${{ github.repository_owner }}/cv-latex:buildcache,mode=max
         target: final
         platforms: linux/amd64
+      
+    - name: Load image for local use
+      run: |
+        docker pull ghcr.io/${{ github.repository_owner }}/cv-latex:latest
+        docker tag ghcr.io/${{ github.repository_owner }}/cv-latex:latest cv-latex:latest
       
     - name: Build CV in devcontainer
       run: |
