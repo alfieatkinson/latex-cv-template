@@ -34,6 +34,7 @@ build_version() {
     local version_name=$1
     local temp_file=$2
     local output_name=$3
+    local output_dir=${4:-"$OUTPUT_DIR"}  # Allow override of output directory
     
     echo -e "${YELLOW}📄 Building ${version_name} version - First pass...${NC}"
     if pdflatex -interaction=nonstopmode "$temp_file" > /dev/null 2>&1; then
@@ -54,9 +55,9 @@ build_version() {
     # Move the PDF to output directory
     local temp_pdf="${temp_file%.tex}.pdf"
     if [ -f "$temp_pdf" ]; then
-        mv "$temp_pdf" "$OUTPUT_DIR/$output_name"
-        local filesize=$(du -h "$OUTPUT_DIR/$output_name" | cut -f1)
-        echo -e "${GREEN}✅ ${version_name} version complete: $OUTPUT_DIR/$output_name (${filesize})${NC}"
+        mv "$temp_pdf" "$output_name"
+        local filesize=$(du -h "$output_name" | cut -f1)
+        echo -e "${GREEN}✅ ${version_name} version complete: $output_name (${filesize})${NC}"
     else
         echo -e "${RED}❌ Error: ${version_name} PDF file was not created!${NC}"
         return 1
@@ -65,25 +66,43 @@ build_version() {
 
 # Build normal version (without redaction)
 echo -e "${BLUE}Building normal version...${NC}"
-# Temporarily move redaction config so normal version doesn't load it
-REDACTION_CONFIG="preamble/redaction-config.tex"
-TEMP_REDACTION_CONFIG="redaction-config-temp.tex"
-if [ -f "$REDACTION_CONFIG" ]; then
-    mv "$REDACTION_CONFIG" "$TEMP_REDACTION_CONFIG"
-fi
+# Create a temporary directory in the workspace to avoid permission issues
+TEMP_DIR="$(pwd)/.build_temp_normal_$$"
+mkdir -p "$TEMP_DIR"
 
-cp "$TEXFILE" "temp-normal.tex"
+# Copy necessary files to temp directory
+cp -r preamble "$TEMP_DIR/"
+cp -r sections "$TEMP_DIR/"
+cp curriculumvitae.cls "$TEMP_DIR/"
+
+# Remove redaction config from the temp preamble directory so it won't be loaded
+rm -f "$TEMP_DIR/preamble/redaction-config.tex"
+
+# Copy the main tex file
+cp "$TEXFILE" "$TEMP_DIR/temp-normal.tex"
+
+# Build in temp directory
+cd "$TEMP_DIR"
 build_version "Normal" "temp-normal.tex" "${FILENAME}.pdf"
+cd - > /dev/null
 
-# Restore redaction config for redacted version
-if [ -f "$TEMP_REDACTION_CONFIG" ]; then
-    mv "$TEMP_REDACTION_CONFIG" "$REDACTION_CONFIG"
-fi
+# Copy result back to original output directory
+mkdir -p "$OUTPUT_DIR"
+cp "$TEMP_DIR/${FILENAME}.pdf" "$OUTPUT_DIR/"
 
 # Build redacted version  
 echo -e "${BLUE}Building redacted version...${NC}"
+# Create redacted version in temp directory
+TEMP_DIR_REDACTED="$(pwd)/.build_temp_redacted_$$"
+mkdir -p "$TEMP_DIR_REDACTED"
+
+# Copy necessary files to temp directory
+cp -r preamble "$TEMP_DIR_REDACTED/"
+cp -r sections "$TEMP_DIR_REDACTED/"
+cp curriculumvitae.cls "$TEMP_DIR_REDACTED/"
+
 # Create temporary file - the class file will automatically load redaction-config.tex if it exists
-cat > temp-redacted.tex << EOF
+cat > "$TEMP_DIR_REDACTED/temp-redacted.tex" << EOF
 \\documentclass{curriculumvitae}
 
 \\input{preamble/personal-details.tex}
@@ -107,14 +126,19 @@ cat > temp-redacted.tex << EOF
 \\end{document}
 EOF
 
+# Build in temp directory
+cd "$TEMP_DIR_REDACTED"
 build_version "Redacted" "temp-redacted.tex" "redacted.pdf"
+cd - > /dev/null
+
+# Copy result back to original output directory
+mkdir -p "$OUTPUT_DIR"
+cp "$TEMP_DIR_REDACTED/redacted.pdf" "$OUTPUT_DIR/"
 
 # Clean up all temporary files
 echo -e "${YELLOW}🧹 Cleaning up temporary files...${NC}"
-rm -f temp-normal.tex temp-redacted.tex
-rm -f temp-normal.aux temp-normal.fdb_latexmk temp-normal.fls temp-normal.log temp-normal.out temp-normal.pdf
-rm -f temp-redacted.aux temp-redacted.fdb_latexmk temp-redacted.fls temp-redacted.log temp-redacted.out temp-redacted.pdf
-rm -f "${FILENAME}.aux" "${FILENAME}.fdb_latexmk" "${FILENAME}.fls" "${FILENAME}.log" "${FILENAME}.out"
+rm -rf "$(pwd)/.build_temp_normal_$$" "$(pwd)/.build_temp_redacted_$$" 2>/dev/null || true
+rm -f "${FILENAME}.aux" "${FILENAME}.fdb_latexmk" "${FILENAME}.fls" "${FILENAME}.log" "${FILENAME}.out" 2>/dev/null || true
 
 echo -e "${GREEN}🎉 Build complete! Both versions created in $OUTPUT_DIR directory:${NC}"
 echo -e "${GREEN}   📄 Normal version: $OUTPUT_DIR/${FILENAME}.pdf${NC}"
