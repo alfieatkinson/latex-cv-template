@@ -101,30 +101,9 @@ cp -r preamble "$TEMP_DIR_REDACTED/"
 cp -r sections "$TEMP_DIR_REDACTED/"
 cp curriculumvitae.cls "$TEMP_DIR_REDACTED/"
 
-# Create temporary file - the class file will automatically load redaction-config.tex if it exists
-cat > "$TEMP_DIR_REDACTED/temp-redacted.tex" << EOF
-\\documentclass{curriculumvitae}
-
-\\input{preamble/personal-details.tex}
-
-\\begin{document}
-
-\\makeheader{}
-
-\\small{}
-\\input{sections/professional-summary.tex}
-\\input{sections/education.tex}
-\\input{sections/experience.tex}
-\\input{sections/projects.tex}
-\\input{sections/skills.tex}
-\\input{sections/courses-and-certifications.tex}
-\\input{sections/awards.tex}
-\\input{sections/volunteer-positions.tex}
-\\input{sections/additional-information.tex}
-\\input{sections/references.tex}
-
-\\end{document}
-EOF
+# Create temporary file that mirrors the main.tex structure but enables redaction
+# Copy the main.tex file to temp directory and use it as-is
+cp "$TEXFILE" "$TEMP_DIR_REDACTED/temp-redacted.tex"
 
 # Build in temp directory
 cd "$TEMP_DIR_REDACTED"
