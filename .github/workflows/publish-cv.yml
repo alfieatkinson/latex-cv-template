@@ -36,7 +36,7 @@ jobs:
       run: |
         cd .devcontainer
         docker build -t cv-latex:latest .
-        
+      
     - name: Build CV in devcontainer
       run: |
         docker run --rm \
@@ -44,7 +44,7 @@ jobs:
           -w /workspace \
           cv-latex:latest \
           bash -c "chmod +x build.sh && ./build.sh"
-          
+
     - name: Generate release filename
       id: filename
       run: |
