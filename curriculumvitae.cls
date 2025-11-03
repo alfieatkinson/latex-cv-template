@@ -341,10 +341,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Main header command that creates the CV header with name and contact info
-% Improved pipe handling: automatically removes pipes when fields are missing
-% - Contact details section: Phone | Email | Website (pipes only appear between existing fields)
-% - Social links section: LinkedIn | GitHub | LeetCode (pipes only appear between existing fields)
-% - Location section: City, County, Country (commas only appear between existing fields)
 \newcommand{\makeheader}{
     % Select font for header (change \headerfontx to use different font)
     \headerfontx

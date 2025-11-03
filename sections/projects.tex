@@ -1,30 +1,35 @@
 \makeprojects{
-    \project
-        {Project Name}{Brief description of the project and its purpose}{Start Date}{End Date}
-        {https://github.com/yourusername/project-repo}{https://project-demo.com}
-        {
-            \item Key feature or achievement of the project
-            \item Technologies and frameworks used (e.g., React, Node.js, PostgreSQL)
-            \item Deployment strategy and performance metrics
-            \item Impact or results achieved (users, performance improvements, etc.)
-        }
+    \project{OpenGalaxy}
+    {Full-Stack Development (TypeScript, React, Next.js, Tailwind CSS, Django, PostgreSQL)}
+    {Jan 2025}{May 2025}
+    {https://github.com/alfieatkinson/opengalaxy}
+    {https://opengalaxy.alfieatkinson.dev}
+    {
+        \item Engineered a high-performance React and Next.js SPA using TypeScript, reducing runtime errors with static typing, and hybrid CSR/SSR rendering, resulting in a 25\% faster page load and improved SEO rankings.\vspace{-0.5mm}
+        \item Implemented responsive UI components with TailwindCSS and DaisyUI, cutting DOM size by 80\% and accelerating styling workflows, reducing frontend maintenance time by 60\% compared to standard CSS.\vspace{-0.5mm}
+        \item Designed backend data schema with Django and PostgreSQL fully normalised to 3NF, optimising query efficiency \\and data integrity for user accounts and media metadata, reducing redundant storage by 15\%.\vspace{-0.5mm}
+        \item Secured user authentication using Django REST Framework with HttpOnly JWT tokens, preventing client-side \\script access and mitigating XSS risks, achieving robust security for sensitive user sessions.\vspace{-0.5mm}
+        \item Automated full-stack CI/CD pipelines integrating Vercel (frontend) and Heroku (backend), with GitHub Actions enforcing Cypress E2E tests on all PRs, decreasing deployment failures by 35\% and accelerating release cycles.
+    }
 
-    \project
-        {Another Project}{Description of another significant project}{Start Date}{End Date}
-        {https://github.com/yourusername/another-project}{}
-        {
-            \item Notable functionality or innovation implemented
-            \item Technical challenges overcome and solutions applied
-            \item Tools and methodologies used in development
-            \item Quantifiable outcomes or user feedback received
-        }
+    \project{Library Management System}
+    {Systems Programming (C++, JSON, Networking, Multi-threading)}
+    {Oct 2024}{Jan 2025}
+    {https://github.com/alfieatkinson/library-management-system}
+    {}
+    {
+        \item Engineered a library management system CLI in C++ with CRUD operations and JSON data persistence.\vspace{-0.5mm}
+        \item Implemented 40+ unit tests using Catch2 to facilitate continuous integration and Test-Driven Development.\vspace{-0.5mm}
+        \item Integrated multi-threading and socket-based networking, enabling concurrent user interactions and remote access.
+    }
 
-    % Add more projects as needed
-    % \project
-    %     {Project Title}{Project description}{Start Date}{End Date}
-    %     {GitHub URL}{Demo URL (optional)}
-    %     {
-    %         \item Achievement or feature
-    %         \item Technologies used
-    %     }
+    % \project{Sentiment Analysis Tool (B.Sc. Dissertation Project)}
+    % {Data Science / Machine Learning (Python, NLP, TensorFlow)}
+    % {Sept 2023}{May 2024}
+    % {https://github.com/alfieatkinson/sentiment-analysis-tool}
+    % {}
+    % {
+    %     \item Designed and implemented a sentiment analysis tool in Python leveraging BERT for social media analytics, \\delivering sentiment predictions with 86.95\% accuracy, furthering to 95\% with k-fold cross-validation enabled.\vspace{-0.5mm}
+    %     \item Optimised data pipelines with Pandas and NumPy, improving processing speed by up to 80\% on large datasets.
+    % }
 }
