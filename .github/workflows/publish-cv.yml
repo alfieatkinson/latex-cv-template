@@ -1,0 +1,81 @@
+name: Build and Release CV
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+concurrency:
+  group: cv-release
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup GitHub CLI
+      uses: actions/setup-gh-cli@v2
+      
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: Build devcontainer
+      run: |
+        cd .devcontainer
+        docker build -t cv-latex:latest .
+        
+    - name: Build CV in devcontainer
+      run: |
+        docker run --rm \
+          -v ${{ github.workspace }}:/workspace \
+          -w /workspace \
+          cv-latex:latest \
+          bash -c "chmod +x build.sh && ./build.sh"
+          
+    - name: Generate release filename
+      id: filename
+      run: |
+        DATE=$(date +%Y%m%d)
+        
+        # Check if a release with today's date already exists
+        EXISTING_RELEASES=$(gh release list --repo ${{ github.repository }} --limit 100 | grep "^${DATE}_AlfieAtkinson_CV" | wc -l)
+        
+        if [ "$EXISTING_RELEASES" -eq 0 ]; then
+          FILENAME="${DATE}_AlfieAtkinson_CV.pdf"
+        else
+          VERSION=$((EXISTING_RELEASES + 1))
+          FILENAME="${DATE}_AlfieAtkinson_CV_v${VERSION}.pdf"
+        fi
+        
+        echo "filename=$FILENAME" >> $GITHUB_OUTPUT
+        echo "Generated filename: $FILENAME"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Rename PDF for release
+      run: |
+        cp output/redacted.pdf "${{ steps.filename.outputs.filename }}"
+        
+    - name: Delete existing cv-latest release
+      run: |
+        gh release delete cv-latest --yes || true
+        git push origin :refs/tags/cv-latest || true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Create release
+      run: |
+        gh release create cv-latest \
+          --title "Latest CV - ${{ steps.filename.outputs.filename }}" \
+          --notes "Latest version of Alfie Atkinson's CV (Auto-generated on $(date '+%Y-%m-%d %H:%M:%S UTC'))" \
+          --latest \
+          "${{ steps.filename.outputs.filename }}"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
