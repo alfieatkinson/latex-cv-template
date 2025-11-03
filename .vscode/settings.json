@@ -1,0 +1,31 @@
+{
+  "latex-workshop.latex.tools": [
+      {
+          "name": "build-sh",
+          "command": "./build.sh",
+          "args": [],
+          "env": {}
+      },
+      {
+          "name": "latexmk",
+          "command": "latexmk",
+          "args": [
+              "-synctex=1",
+              "-interaction=nonstopmode",
+              "-file-line-error",
+              "%DOC%"
+          ]
+      }
+  ],
+  "latex-workshop.latex.recipes": [
+      {
+          "name": "CV Build Script",
+          "tools": ["build-sh"]
+      },
+      {
+          "name": "latexmk",
+          "tools": ["latexmk"]
+      }
+  ],
+  "latex-workshop.latex.recipe.default": "CV Build Script",
+}
