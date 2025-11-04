@@ -1,7 +1,7 @@
-# Multi-stage build for better caching
-FROM fedora:40 AS base
+# Use Fedora 40 as base
+FROM fedora:40
 
-# Install system packages first
+# Install system packages in a single layer for better caching
 RUN dnf update -y && \
     dnf install -y \
     python3 \
@@ -11,22 +11,48 @@ RUN dnf update -y && \
     bash \
     && dnf clean all
 
-# Install TeX Live and related packages
-FROM base AS texlive
+# Install minimal TeXLive scheme and only required packages
+# This layer will be cached unless package requirements change
 RUN dnf install -y \
-    texlive-scheme-full \
+    # Core TeXLive installation (minimal)
+    texlive-scheme-basic \
+    texlive-collection-latex \
+    texlive-collection-latexrecommended \
+    # Build tools
     latexmk \
-    biber \
+    # Specific packages required by your CV template
+    texlive-xcolor \
+    texlive-geometry \
+    texlive-enumitem \
+    texlive-fancyhdr \
+    texlive-multicol \
+    texlive-graphicx \
+    texlive-fontawesome5 \
+    texlive-tcolorbox \
+    texlive-hyperref \
+    texlive-ifthen \
+    texlive-titlesec \
+    texlive-tabularx \
+    texlive-wrapfig \
+    texlive-ragged2e \
+    texlive-marvosym \
+    texlive-cfr-lm \
+    texlive-fontenc \
+    texlive-lipsum \
+    texlive-float \
+    texlive-verbatim \
+    # Font packages for your template's font options
+    texlive-collection-fontsrecommended \
+    texlive-collection-fontutils \
+    # Additional LaTeX packages that might be needed
+    texlive-latexsym \
+    texlive-fullpage \
     && dnf clean all
 
-# Final stage
-FROM texlive AS final
-
 # User setup
-RUN useradd -ms /bin/bash dev
-
-# Create workspace directory with proper permissions
-RUN mkdir -p /workspace && chown dev:dev /workspace
+RUN useradd -ms /bin/bash dev && \
+    mkdir -p /workspace && \
+    chown dev:dev /workspace
 
 USER dev
 WORKDIR /workspace
