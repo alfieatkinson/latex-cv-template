@@ -69,15 +69,26 @@ jobs:
         id: filename
         run: |
           DATE=$(date +%Y%m%d)
-
-          # Check if a release with today's date already exists
-          EXISTING_RELEASES=$(gh release list --repo ${{ github.repository }} --limit 100 | grep "^${DATE}_AlfieAtkinson_CV" | wc -l)
+          # Extract name from repository for filename (fallback to "CV" if needed)
+          REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
+          NAME_PART=$(echo "${REPO_NAME}" | sed 's/cv$//' | sed 's/-cv$//' | sed 's/_cv$//' | tr '[:lower:]' '[:upper:]')
+          
+          # If no name extracted or just "CV", use generic naming
+          if [ -z "$NAME_PART" ] || [ "$NAME_PART" = "CV" ]; then
+            NAME_PART="CV"
+            FILENAME_BASE="${DATE}_${NAME_PART}.pdf"
+          else
+            FILENAME_BASE="${DATE}_${NAME_PART}_CV.pdf"
+          fi
+          
+          EXISTING_RELEASES=$(gh release list --repo ${{ github.repository }} --limit 100 | grep "^${DATE}_.*_CV" | wc -l)
 
           if [ "$EXISTING_RELEASES" -eq 0 ]; then
-            FILENAME="${DATE}_AlfieAtkinson_CV.pdf"
+            FILENAME="$FILENAME_BASE"
           else
             VERSION=$((EXISTING_RELEASES + 1))
-            FILENAME="${DATE}_AlfieAtkinson_CV_v${VERSION}.pdf"
+            FILENAME_WITHOUT_EXT="${FILENAME_BASE%.pdf}"
+            FILENAME="${FILENAME_WITHOUT_EXT}_v${VERSION}.pdf"
           fi
 
           echo "filename=$FILENAME" >> $GITHUB_OUTPUT
@@ -85,10 +96,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Rename PDF for release
+      - name: Prepare release files
         run: |
           cp output/redacted.pdf "${{ steps.filename.outputs.filename }}"
-          # Also copy to docs for GitHub Pages
           cp output/redacted.pdf "docs/cv.pdf"
 
       - name: Delete existing cv-latest release
@@ -102,7 +112,7 @@ jobs:
         run: |
           gh release create cv-latest \
             --title "Latest CV - ${{ steps.filename.outputs.filename }}" \
-            --notes "Latest version of Alfie Atkinson's CV (Auto-generated on $(date '+%Y-%m-%d %H:%M:%S UTC'))" \
+            --notes "Latest version of CV (Auto-generated on $(date '+%Y-%m-%d %H:%M:%S UTC'))" \
             --latest \
             "${{ steps.filename.outputs.filename }}"
         env:
