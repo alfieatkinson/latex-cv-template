@@ -51,7 +51,6 @@
     \newcommand{\redactwebsite}{false}
     \newcommand{\redactlinkedin}{false}
     \newcommand{\redactgithub}{false}
-    \newcommand{\redactleetcode}{false}
     \newcommand{\redactfulladdress}{false}
     \newcommand{\redactworklocations}{false}
     \newcommand{\redacteducationlocations}{false}
@@ -108,9 +107,6 @@
 
 \lxdef \@github {}
 \newcommand{\github}[1]{\xdef\@github{#1}}
-
-\lxdef \@leetcode {}
-\newcommand{\leetcode}[1]{\xdef\@leetcode{#1}}
 
 % Location information
 \lxdef \@city {}
@@ -372,26 +368,27 @@
     \end{center}
     \vspace{-6mm}
 
-    % Social links (conditionally include each if defined)
+        % Social links (conditionally include each if defined)
     \begin{center}
         \small{
         % Build social links line with proper pipe separation
-        \ifx\@linkedin\empty\else
-            \mayredactcontact{\redactlinkedin}{\href{https://www.\@linkedin}{\linkstyle{\@linkedin}}}
-        \fi
-        % Add pipe before github if linkedin exists and github exists
-        \ifx\@linkedin\empty\else \ifx\@github\empty\else \enspace | \fi \fi
-        \ifx\@github\empty\else
-            \mayredactcontact{\redactgithub}{\href{https://www.\@github}{\linkstyle{\@github}}}
-        \fi
-        % Add pipe before leetcode if (linkedin OR github exists) AND leetcode exists
-        \ifx\@leetcode\empty\else
-            \ifx\@linkedin\empty 
-                \ifx\@github\empty \else \enspace | \fi 
-            \else 
-                \enspace | 
+        % Only handle LinkedIn and GitHub
+        \ifx\@linkedin\empty
+            \ifx\@github\empty
+                % No social links at all
+            \else
+                % Only GitHub
+                \mayredactcontact{\redactgithub}{\href{https://www.\@github}{\linkstyle{\@github}}}
             \fi
-            \mayredactcontact{\redactleetcode}{\href{https://www.\@leetcode}{\linkstyle{\@leetcode}}}
+        \else
+            % LinkedIn exists
+            \mayredactcontact{\redactlinkedin}{\href{https://www.\@linkedin}{\linkstyle{\@linkedin}}}
+            \ifx\@github\empty
+                % Only LinkedIn
+            \else
+                % Both LinkedIn and GitHub exist
+                \enspace | \mayredactcontact{\redactgithub}{\href{https://www.\@github}{\linkstyle{\@github}}}
+            \fi
         \fi
         }
     \end{center}
