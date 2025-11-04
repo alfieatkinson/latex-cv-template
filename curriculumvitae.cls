@@ -6,7 +6,7 @@
 % elements like education, experience, projects, skills, and more.
 %
 % Author: Your Name (based on various CV templates)
-% License: CC BY-NC 4.0 (Non-Commercial Creative Commons)
+% Licence: CC BY-NC 4.0 (Non-Commercial Creative Commons)
 % Version: 1.0
 % Date: 2024
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

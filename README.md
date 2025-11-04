@@ -76,6 +76,6 @@ Modify colours and fonts in `curriculumvitae.cls`:
 \definecolor{accentcolor}{RGB}{72, 0, 128}  % Change accent colour
 ```
 
-## License
+## Licence
 
 Creative Commons BY-NC 4.0 - Free for non-commercial use with attribution.
