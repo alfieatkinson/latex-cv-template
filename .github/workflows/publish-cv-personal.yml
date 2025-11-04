@@ -1,0 +1,128 @@
+name: Build and Release CV
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: cv-release
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  packages: write
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install GitHub CLI
+        run: |
+          type -p curl >/dev/null || (sudo apt-get update && sudo apt-get install curl -y)
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+          sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+          sudo apt-get update
+          sudo apt-get install gh -y
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push lightweight LaTeX container
+        uses: docker/build-push-action@v5
+        with:
+          context: .devcontainer
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/cv-latex:latest
+            ghcr.io/${{ github.repository_owner }}/cv-latex:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+
+      - name: Build CV using container
+        run: |
+          # Ensure output directory exists
+          mkdir -p output
+          
+          # Build CV using the container
+          docker run --rm \
+            -v ${{ github.workspace }}:/workspace \
+            -w /workspace \
+            --user $(id -u):$(id -g) \
+            ghcr.io/${{ github.repository_owner }}/cv-latex:latest \
+            bash build.sh
+
+      - name: Generate release filename
+        id: filename
+        run: |
+          DATE=$(date +%Y%m%d)
+          # Extract name from repository for filename (fallback to "CV" if needed)
+          REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
+          NAME_PART=$(echo "${REPO_NAME}" | sed 's/cv$//' | sed 's/-cv$//' | sed 's/_cv$//' | tr '[:lower:]' '[:upper:]')
+          
+          # If no name extracted or just "CV", use generic naming
+          if [ -z "$NAME_PART" ] || [ "$NAME_PART" = "CV" ]; then
+            NAME_PART="CV"
+            FILENAME_BASE="${DATE}_${NAME_PART}.pdf"
+          else
+            FILENAME_BASE="${DATE}_${NAME_PART}_CV.pdf"
+          fi
+          
+          EXISTING_RELEASES=$(gh release list --repo ${{ github.repository }} --limit 100 | grep "^${DATE}_.*_CV" | wc -l)
+
+          if [ "$EXISTING_RELEASES" -eq 0 ]; then
+            FILENAME="$FILENAME_BASE"
+          else
+            VERSION=$((EXISTING_RELEASES + 1))
+            FILENAME_WITHOUT_EXT="${FILENAME_BASE%.pdf}"
+            FILENAME="${FILENAME_WITHOUT_EXT}_v${VERSION}.pdf"
+          fi
+
+          echo "filename=$FILENAME" >> $GITHUB_OUTPUT
+          echo "Generated filename: $FILENAME"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Prepare release files
+        run: |
+          cp output/redacted.pdf "${{ steps.filename.outputs.filename }}"
+          cp output/redacted.pdf "docs/cv.pdf"
+
+      - name: Delete existing cv-latest release
+        run: |
+          gh release delete cv-latest --yes || true
+          git push origin :refs/tags/cv-latest || true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create release
+        run: |
+          gh release create cv-latest \
+            --title "Latest CV - ${{ steps.filename.outputs.filename }}" \
+            --notes "Latest version of CV (Auto-generated on $(date '+%Y-%m-%d %H:%M:%S UTC'))" \
+            --latest \
+            "${{ steps.filename.outputs.filename }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
+          force_orphan: true
