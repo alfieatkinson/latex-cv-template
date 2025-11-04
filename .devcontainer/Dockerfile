@@ -12,11 +12,13 @@ RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
     ghostscript \
-    # Core LaTeX installation - only what we need
+    # Core LaTeX installation with all required packages
     texlive-base \
     texlive-latex-recommended \
     texlive-latex-extra \
     texlive-fonts-recommended \
+    texlive-fonts-extra \
+    texlive-pictures \
     latexmk \
     # Clean up to reduce image size
     && apt-get clean \
