@@ -1,31 +1,28 @@
-# Use Fedora 40 as base
-FROM fedora:40
+# Use Ubuntu LTS for reliable LaTeX packages
+FROM ubuntu:22.04
 
-# Install system packages in a single layer for better caching
-RUN dnf update -y && \
-    dnf install -y \
+# Prevent interactive prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install LaTeX and required packages in a single layer
+RUN apt-get update && apt-get install -y \
+    # Essential system tools
+    bash \
+    git \
     python3 \
     python3-pip \
     ghostscript \
-    git \
-    bash \
-    && dnf clean all
-
-# Install minimal TeXLive and required collections
-# This layer will be cached unless package requirements change
-RUN dnf install -y \
-    # Core TeXLive installation
-    texlive-scheme-basic \
-    texlive-collection-latex \
-    texlive-collection-latexrecommended \
-    texlive-collection-latexextra \
-    texlive-collection-fontsrecommended \
-    texlive-collection-fontutils \
-    # Build tools
+    # Core LaTeX installation - only what we need
+    texlive-base \
+    texlive-latex-recommended \
+    texlive-latex-extra \
+    texlive-fonts-recommended \
     latexmk \
-    && dnf clean all
+    # Clean up to reduce image size
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# User setup
+# Create non-root user
 RUN useradd -ms /bin/bash dev && \
     mkdir -p /workspace && \
     chown dev:dev /workspace

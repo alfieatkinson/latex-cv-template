@@ -39,44 +39,30 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{ github.actor }}
+          username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Pre-warm cache by pulling existing images
-        run: |
-          # Pull any existing cache images to speed up the build
-          docker pull ghcr.io/${{ github.repository_owner }}/cv-latex:latest || echo "No existing latest image found"
-          docker pull ghcr.io/${{ github.repository_owner }}/cv-latex:buildcache || echo "No existing build cache found"
-
-      - name: Build and push devcontainer with cache
+      - name: Build and push lightweight LaTeX container
         uses: docker/build-push-action@v5
         with:
           context: .devcontainer
           push: true
-          tags: |
-            ghcr.io/${{ github.repository_owner }}/cv-latex:latest
-          cache-from: |
-            type=registry,ref=ghcr.io/${{ github.repository_owner }}/cv-latex:buildcache
-            type=registry,ref=ghcr.io/${{ github.repository_owner }}/cv-latex:latest
-          cache-to: type=registry,ref=ghcr.io/${{ github.repository_owner }}/cv-latex:buildcache,mode=max
+          tags: ghcr.io/${{ github.repository_owner }}/cv-latex:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           platforms: linux/amd64
 
-      - name: Load image for local use
+      - name: Build CV using container
         run: |
-          docker pull ghcr.io/${{ github.repository_owner }}/cv-latex:latest
-          docker tag ghcr.io/${{ github.repository_owner }}/cv-latex:latest cv-latex:latest
-
-      - name: Build CV in devcontainer
-        run: |
-          # Ensure output directory exists and has proper permissions
+          # Ensure output directory exists
           mkdir -p output
-
-          # Run container as current user to avoid permission issues
+          
+          # Build CV using the container
           docker run --rm \
             -v ${{ github.workspace }}:/workspace \
             -w /workspace \
             --user $(id -u):$(id -g) \
-            cv-latex:latest \
+            ghcr.io/${{ github.repository_owner }}/cv-latex:latest \
             bash build.sh
 
       - name: Generate release filename
