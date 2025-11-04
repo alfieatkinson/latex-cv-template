@@ -1,22 +1,23 @@
 # Repository Setup Guide
 
-## GitHub Actions Permissions
+## For Personal CV Repositories
 
-If you get 403 Forbidden errors when the workflow tries to push to GitHub Container Registry:
+If you're using this template for your personal CV:
 
-1. Go to your repository on GitHub
-2. Navigate to **Settings** → **Actions** → **General**  
-3. Under **Workflow permissions**, select **"Read and write permissions"**
-4. Click **Save**
+1. **Replace the workflow**: Delete `.github/workflows/publish-cv.yml` and rename `publish-cv-personal.yml` to `publish-cv.yml`
+2. **Set up permissions**: Go to your repository **Settings** → **Actions** → **General** → **Workflow permissions** and select **"Read and write permissions"**
+3. **Enable Pages**: Go to **Settings** → **Pages** and set source to "GitHub Actions"
 
-That's it! The workflow will now be able to build and push the Docker container.
+The personal workflow will:
+- Build a Docker container with LaTeX
+- Compile your CV 
+- Create GitHub releases with PDFs
+- Deploy to GitHub Pages
+
+## For Template Development
+
+The default workflow (`publish-cv.yml`) just tests that the template builds correctly without publishing anything. This is appropriate for the template repository itself.
 
 ## First Run
 
-The first time you push to your repository, the workflow will:
-1. Build a fresh Docker container with LaTeX
-2. Compile your CV 
-3. Create a GitHub release with the PDF
-4. Deploy to GitHub Pages
-
-This process takes about 2-3 minutes initially, then subsequent builds are much faster due to caching.
+The first time you push to your personal repository, the workflow takes about 2-3 minutes to build the container, then subsequent builds are much faster due to caching.
