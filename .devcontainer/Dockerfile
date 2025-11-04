@@ -11,42 +11,18 @@ RUN dnf update -y && \
     bash \
     && dnf clean all
 
-# Install minimal TeXLive scheme and only required packages
+# Install minimal TeXLive and required collections
 # This layer will be cached unless package requirements change
 RUN dnf install -y \
-    # Core TeXLive installation (minimal)
+    # Core TeXLive installation
     texlive-scheme-basic \
     texlive-collection-latex \
     texlive-collection-latexrecommended \
-    # Build tools
-    latexmk \
-    # Specific packages required by your CV template
-    texlive-xcolor \
-    texlive-geometry \
-    texlive-enumitem \
-    texlive-fancyhdr \
-    texlive-multicol \
-    texlive-graphicx \
-    texlive-fontawesome5 \
-    texlive-tcolorbox \
-    texlive-hyperref \
-    texlive-ifthen \
-    texlive-titlesec \
-    texlive-tabularx \
-    texlive-wrapfig \
-    texlive-ragged2e \
-    texlive-marvosym \
-    texlive-cfr-lm \
-    texlive-fontenc \
-    texlive-lipsum \
-    texlive-float \
-    texlive-verbatim \
-    # Font packages for your template's font options
+    texlive-collection-latexextra \
     texlive-collection-fontsrecommended \
     texlive-collection-fontutils \
-    # Additional LaTeX packages that might be needed
-    texlive-latexsym \
-    texlive-fullpage \
+    # Build tools
+    latexmk \
     && dnf clean all
 
 # User setup
